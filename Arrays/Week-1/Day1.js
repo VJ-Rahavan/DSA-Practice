@@ -2,7 +2,7 @@
 
 class DynamicArray {
   constructor(capacity) {
-    this.arr = new Array();
+    this.arr = [];
     this.capacity = capacity;
     this.size = 0;
   }
@@ -10,10 +10,8 @@ class DynamicArray {
   getValueByIndex = (index) => {
     try {
       if (typeof index === 'number') {
-        for (let i = 0; i < this.arr.length; i++) {
-          if (i === index) {
-            return this.arr[index];
-          }
+        if (this.arr[index]) {
+          return this.arr[index];
         }
         throw new Error('Value not found!');
       } else {
@@ -24,55 +22,39 @@ class DynamicArray {
     }
   };
 
-  insetValueBySorting = (tempArr, value) => {
-    let size = 0;
-
-    for (let i = 0; i < this.arr.length; i++) {
-      if (this.arr[i] < value) {
-        tempArr.push(this.arr[i]);
-        size++;
-        if (!this.arr[i + 1] || this.arr[i + 1] >= value) {
-          tempArr.push(value);
-          size++;
-        }
-      } else if (this.arr[i] > value) {
-        if (!this.arr[i - 1]) {
-          tempArr.push(value);
-          size++;
-        }
-        tempArr.push(this.arr[i]);
-        size++;
-      } else {
-        tempArr.push(value);
-        tempArr.push(this.arr[i]);
-        size += 2;
-      }
-    }
-
-    return size;
-  };
-
   checkIfValueCanBeAdded = () => {
     if (this.capacity === this.size) {
       throw new Error('Array Size Limit is Exceeded');
     }
   };
 
-  insertValue = (value) => {
+  insertValue(value) {
     try {
-      let tempArr = [];
-      this.checkIfValueCanBeAdded();
-      if (this.arr.length === 0) {
-        tempArr.push(value);
-      } else {
-        this.size = this.insetValueBySorting(tempArr, value);
+      if (this.size === this.capacity) {
+        this.checkIfValueCanBeAdded();
       }
-      this.arr = [...tempArr];
+
+      let tempArr = [];
+      let inserted = false;
+
+      for (let i = 0; i < this.size; i++) {
+        if (!inserted && this.arr[i] >= value) {
+          tempArr.push(value);
+          inserted = true;
+        }
+        tempArr.push(this.arr[i]);
+      }
+
+      if (!inserted) tempArr.push(value);
+
+      this.arr = tempArr;
+      this.size++;
+
       return this.arr;
     } catch (error) {
       return error.message;
     }
-  };
+  }
 
   deleteValue = (value) => {
     try {
@@ -81,6 +63,7 @@ class DynamicArray {
       for (let i of this.arr) {
         if (i === value && c === 1) {
           c--;
+          this.size--;
           console.log('Deleted');
         } else {
           temp.push(i);
